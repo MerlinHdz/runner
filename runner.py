@@ -20,6 +20,7 @@ ground_y = 300
 
 # Obstacles
 snail_surface = pygame.image.load("graphics/snail/snail1.png").convert_alpha()
+fly_surface = pygame.image.load("graphics/Fly/Fly1.png").convert_alpha()
 # snail_rect = snail_surface.get_rect(bottomleft=(WIDTH - 100, ground_y))
 
 obstacle_rect_list = []
@@ -55,13 +56,28 @@ def obstacle_movement(obstacle_list):
     if obstacle_list:
         for obstacle_rect in obstacle_list:
             obstacle_rect.x -= snail_vel
-            screen.blit(snail_surface, obstacle_rect)
+
+            # screen.blit(snail_surface, obstacle_rect)
+            if obstacle_rect.bottom == ground_y:
+                screen.blit(snail_surface, obstacle_rect)
+            else:
+                screen.blit(fly_surface, obstacle_rect)
 
         obstacle_list = [obstacle for obstacle in obstacle_list if obstacle.x > -100]
 
         return obstacle_list
     else:
         return []
+
+
+def collisions(player, obstacles):
+    # The return value of this function will determine if game is active or not
+    if obstacles:
+        for obstacle_rect in obstacles:
+            if player.colliderect(obstacle_rect):
+                return False
+
+    return True
 
 
 while True:
@@ -80,16 +96,17 @@ while True:
                     player_g = -20
         else:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                # snail_rect.left = WIDTH
+                obstacle_rect_list.clear()
                 player_rect.bottom = ground_y
                 score = 0
                 score_surface = test_font.render(f'Score: {score}', False, (64, 64, 64))
                 game_active = True
 
         if event.type == obstacle_timer and game_active:
-            ran_x = randint(900, 1100)
-            obstacle_rect_list.append(snail_surface.get_rect(bottomleft=(ran_x, ground_y)))
-            
+            if randint(0,2):
+                obstacle_rect_list.append(snail_surface.get_rect(bottomleft=(WIDTH, ground_y)))
+            else:
+                obstacle_rect_list.append(fly_surface.get_rect(bottomleft=(WIDTH, 150)))
 
     if game_active:
         # blit stands for block image transfer. the .blit() method takes a surface and position
@@ -97,17 +114,7 @@ while True:
         screen.blit(ground_surface, (0, ground_y))
         screen.blit(score_surface, score_rect)
 
-        # Snail
-        # snail_rect.right -= snail_vel
-
-        # if snail_rect.right <= 0:
-        #     score += 1
-        #     score_surface = test_font.render(f'Score: {score}', False, (64, 64, 64))
-
-        #     snail_rect.right = WIDTH - 50
-
-        # screen.blit(snail_surface, snail_rect)
-
+        
         # Player
         player_g += 1
         player_rect.bottom += player_g
@@ -121,8 +128,8 @@ while True:
         obstacle_list = obstacle_movement(obstacle_rect_list)
 
         # Collision
-        # if snail_rect.colliderect(player_rect):
-        #     game_active = False
+        game_active = collisions(player_rect, obstacle_rect_list)
+
     else:
         screen.fill((94,129,162))
         screen.blit(player_end_surface, player_end_rect)
