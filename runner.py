@@ -60,14 +60,17 @@ player_g = 0
 game_active = False
 
 
-# Timer
-obstacle_timer = pygame.USEREVENT + 1
+# Timers
+score_timer = pygame.USEREVENT + 1
+pygame.time.set_timer(score_timer, 1000)
+
+obstacle_timer = pygame.USEREVENT + 2
 pygame.time.set_timer(obstacle_timer, 1500)
 
-snail_animation_timer = pygame.USEREVENT + 2
+snail_animation_timer = pygame.USEREVENT + 3
 pygame.time.set_timer(snail_animation_timer, 300)
 
-fly_animation_timer = pygame.USEREVENT + 3
+fly_animation_timer = pygame.USEREVENT + 4
 pygame.time.set_timer(fly_animation_timer, 200)
 
 
@@ -125,6 +128,9 @@ while True:
                 if event.key == pygame.K_SPACE:
                     player_g = -20
 
+            if event.type == score_timer:
+                score += 1
+                score_surf = test_font.render(f'Score: {score}', False, (64, 64, 64))
             
             if event.type == obstacle_timer:
                 if randint(0,2):
@@ -155,6 +161,8 @@ while True:
         # blit stands for block image transfer. the .blit() method takes a surface and position
         screen.blit(sky_surf, (0, 0))
         screen.blit(ground_surf, (0, ground_y))
+
+        # Update and display score
         screen.blit(score_surf, score_rect)
 
         # Player
@@ -168,6 +176,7 @@ while True:
         
         screen.blit(player_surf, player_rect)
 
+        # Generate Obstacles
         obstacle_list = obstacle_movement(obstacle_rect_list)
 
         # Collision
